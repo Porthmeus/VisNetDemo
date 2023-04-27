@@ -1,0 +1,379 @@
+---
+author: Jan Taubenheim
+title: Using visNet for metabolic model display
+date: "`r Sys.Date()`"
+output: 
+    revealjs::revealjs_presentation:
+        reveal_options:
+                slideNumber: true
+                chalkboard:
+                        theme : "whiteboard"
+        reveal_plugins: ["search","chalkboard"]
+        theme: white
+        incremental: true
+        transition: fade
+        #template: ./customTemplate_white.html
+        self_contained: false
+#    beamer_presentation:
+#            colortheme: "dolphin"
+parallaxBackgroundImage: ./map01100_light.jpg
+parallaxBackgroundSize: 3274px 2140px
+#background-image: ./map01100.jpg
+
+---
+
+
+# Introduction to visNetworks
+
+## Introduction to `visNetworks `
+
++ Based on the [vis.js](https://visjs.org/) library - java script library for data visualization and interactions
++ Provides routines for graph display and simple interactions in html output
++ Is also suitable to display hierarchical/tree structures
+
+## Example 
+
+<iframe data-src="https://visjs.github.io/vis-network/examples/network/nodeStyles/circularImages.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+# Simple walk through
+
+## Data structures needed
+
+**visNetworks** needs two information
+
++ a nodes `data.frame` with an *id* column
++ an edges `data.frame` with a *from* and a *to* column
+
+## Minimal nodes
+
+```{r minimalNodes}
+
+nodes <- data.frame(id = 1:5)
+head(nodes)
+
+```
+
+## Minimal edges
+
+```{r minimalEdges}
+edges <- data.frame(from = c(2,5,3,3), to = c(1,2,4,2))
+head(edges)
+```
+
+## Minimal example
+
+
+```{r minimalExample}
+
+require(visNetwork, quietly = TRUE)
+net <- visNetwork(nodes, edges, width = "100%", height = 300)
+visSave(net, file = file.path("networks", "ME1.html"))
+
+```
+
+<iframe data-src="networks/ME1.html"
+    width="100%"
+    height=300">
+</iframe>
+
+## Change nodes
+
+```{r changeNodes}
+
+nodes[["label"]] <- paste("N",1:nrow(nodes))
+nodes[["shape"]] <- c("box","diamond","ellipse","dot","square")
+nodes[["color"]] <- c("pink","purple","red","blue","yellow")
+net <- visNetwork(nodes, edges, width = "100%", height = "300")
+visSave(net, file = file.path("networks", "ME2.html"))
+
+```
+
+<iframe data-src="networks/ME2.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+## Changing edges
+
+```{r changeEdges}
+
+nodes <- data.frame(id = 1:5)
+edges <- data.frame(from = c(2,5,3,3), to = c(1,2,4,2))
+edges[["label"]] <- paste("E",1:nrow(edges))
+edges[["width"]] <- 1:nrow(edges)
+edges[["color"]] <- c("red","pink","purple","black")
+edges[["arrows"]] <- c("to","from","to;from","middle")
+net <- visNetwork(nodes, edges, width = "100%", height = "300")
+visSave(net, file = file.path("networks", "ME3.html"))
+
+```
+
+<iframe data-src="networks/ME3.html"
+    width="100%"
+    height=300">
+</iframe>
+
+## Groups and global settings
+
+```{r groupsGlobal}
+
+nodes <- data.frame(id = 1:5, label = paste("N",1:5))
+edges <- data.frame(from = c(2,5,3,3), to = c(1,2,4,2))
+nodes[["group"]] <- c(rep("A", 2), rep("B", 3))
+net <- visNetwork(nodes, edges, width = "100%", height = "300") %>%
+    visNodes(shape = "square") %>%
+    visEdges(arrows = "to;from") %>%
+    visGroups(groupname = "A", shape = "box") %>%
+    visGroups(groupname = "B", color = "red")
+visSave(net, file = file.path("networks", "ME4.html"))
+
+```
+
+<iframe data-src="networks/ME4.html"
+    width="100%"
+    height=300">
+</iframe>
+
+## Adding a legend
+
+Default on groups:
+
+```{r legendGroups}
+
+net.legend <- net %>% visLegend()
+visSave(net.legend, file = file.path("networks", "ME5.html"))
+
+```
+
+
+<iframe data-src="networks/ME5.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+## Adding a legend
+
+Custom legend:
+```{r customLegend}
+nodes.legend <- data.frame(label = c("box-nodes","square-nodes"),
+                           shape = c("box","square"),
+                           color = c("cornflowerblue", "red"))
+net.legend <- net %>% 
+    visLegend(useGroups = FALSE, addNodes = nodes.legend)
+visSave(net.legend, file = file.path("networks", "ME6.html"))
+```
+
+<iframe data-src="networks/ME6.html"
+    width="100%"
+    height=300">
+</iframe>
+
+## Information for hovering
+
+```{r hoveringInformation}
+
+nodes <- data.frame(id = 1:5, title = paste("N",1:5))
+edges <- data.frame(from = c(2,5,3,3), to = c(1,2,4,2))
+
+net <- visNetwork(nodes, edges, width = "100%", height = "300") %>%
+    visNodes(shape = "dot")
+visSave(net, file = file.path("networks", "ME7.html"))
+
+```
+
+<iframe data-src="networks/ME7.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+
+## Highlighting
+
+```{r highlighting}
+
+net.high <- net %>% 
+    visOptions(highlightNearest = list(enabled = TRUE,
+                                       degree = 1))
+
+visSave(net.high, file = file.path("networks", "ME8.html"))
+```
+
+<iframe data-src="networks/ME8.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+## Node selection
+
+
+```{r nodeSelection}
+
+nodes["selection"] <- c("A,N1","A,N2","B,N3","B,N4","B,N5")
+net <- visNetwork(nodes, edges, width = "100%", height = "300") %>%
+    visOptions(selectedBy = list(variable = "selection",
+                               multiple = TRUE))
+
+visSave(net, file = file.path("networks", "ME9.html"))
+
+```
+
+
+<iframe data-src="networks/ME9.html"
+    width="100%"
+    height=300">
+</iframe>
+
+
+# Applying it to metabolic models - Recon3D as example
+
+## Creating a base egde table
+
+```{python baseEdgeTable, eval = FALSE}
+
+import sys
+import cobra as cb
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from itertools import product
+
+def sbml2networkcsv(Path:sbmlfile) -> pd.DataFrame
+
+""" reads a metabolic model from an sbml and returns a data frame with the basic edge informations"""
+
+col3d = cb.io.read_sbml_model(sbmlfile)
+
+# go through the reaction and create a data frame which contains the network
+dat_all = pd.DataFrame()
+for rxn in col3d.reactions:
+    left = [x.id for x in rxn.metabolites if rxn.metabolites[x] <0] # get left side of formula
+    right = [x.id for x in rxn.metabolites if rxn.metabolites[x] >0] # get right side of formula
+    dat = pd.DataFrame(product(left,right), columns = ["from.id","to.id"]) # create edges between them
+    dat["reaction"] = rxn.id # add the reaction id 
+    dat["subsystem"] = rxn.subsystem # add the subsystem
+    if rxn.reversibility: # add information on reversibility
+        dat["arrows"] = "to;from" 
+    else: 
+        dat["arrows"] = "to"
+    dat_all = pd.concat([dat_all, dat])
+return(dat_all)
+
+if __name__ == "__main__":
+    dat_all = sbml2networkcsv(Path(sys.args[1]))
+    dat_all.to_csv(sys.args[2],index = False)
+```
+
+
+## Resulting table
+
+```{r baseEdgeFile}
+
+require(data.table, quiet = TRUE)
+edg <-  fread("dat/baseEdges.csv")
+head(edg)
+
+```
+
+## Removing cofactors
+
+- Cofactors would overcrowd the network and make it less comprehensible, thus we remove it
+
+. . . 
+
+```{r removeMetabolites}
+
+rm.mets <- fread(file.path("dat","cofactorsAnorganicCompounds.csv"))
+head(rm.mets)
+```
+
+## Removing cofactors
+
+```{r removeMetabolites2}
+# remove the cofactors from the edge list
+nrow(edg)
+edg <- edg[(!gsub("\\[[a-z]\\]","",from.id) %in% rm.mets[,mets]),]
+edg <- edg[(!gsub("\\[[a-z]\\]","",to.id) %in% rm.mets[,mets]),]
+colnames(edg)[3] <- "rxn.id"
+nrow(edg)
+```
+
+
+## Creating the correct tables for visNetwork
+
+```{r createNodes}
+# create a nodes data frame
+nodes.id <- data.table(met.id = unique(c(edg[,from.id], edg[,to.id])))
+nodes.id[,id := 1:nrow(nodes.id)]
+head(nodes.id)
+```
+
+## Adding to/from columns for edges
+
+```{r tofromEdge}
+
+edges.id <- merge(edg, nodes.id[,.(met.id,id)], by.y = "met.id", by.x = "to.id", all.x = TRUE)
+edges.id <- merge(edges.id, nodes.id[,.(met.id,id)], by.y = "met.id", by.x = "from.id", suffix =c(".to_index",".from_index"), all.x = TRUE)
+# rename the columns
+colnames(edges.id)[grep("_index", colnames(edges.id))] <- c("to","from")
+edges.id <- edges.id[!is.na(to) & !is.na(from),]
+# sort columns
+sel <- unique(c("to","from", colnames(edges.id)))
+edges.id <- edges.id[,..sel]
+head(edges.id)
+
+```
+
+## Adding more information
+
+```{r moreNodeInfo}
+bas <- fread(file.path("dat","Mets2Subsystems.csv"))
+nodes.id <- merge(nodes.id,
+                  bas[,.(met.id = metabolite,
+                         met.name, subsystem)],
+                  by = "met.id",
+                  keep.x = TRUE)
+# collapse the subsystems column
+nodes.id <- nodes.id[,.(subsystem = paste(gsub(",",";",subsystem), collapse = ",")),
+                     by = .(id, met.id,met.name)]
+head(nodes.id)
+
+
+```
+
+## Creating the final network
+
+```{r generateNetwork}
+# sort and rename edges and nodes
+nodes.final <- nodes.id[,.(id, label = met.id, title = met.name, subsystem)]
+edges.final <- edges.id[,.(to, from, label = rxn.id, title = subsystem)]
+# create the network representation
+vis.net <- visNetwork(nodes = nodes.final,
+                      edges = edges.final,
+                      main = "Recon3D map",
+                      width = "100%", height = "1300px") %>%
+    # use this for large networks (otherwise physics calc. take very long)
+    visIgraphLayout(layout = "layout_components") %>% 
+    visOptions(highlightNearest = list(enabled = TRUE,
+                                     degree = 1),
+              nodesIdSelection = list(enabled = TRUE,
+                                      main = "Select metabolite ID"),
+              selectedBy = list(variable = "subsystem",
+                                multiple = TRUE,
+                                hideColor = "#C8C8C84C",
+                                main = "Select subsystem")
+              )
+visSave(vis.net,
+        file = file.path("networks", "finalRecon3DNetwork.html"),
+        selfcontained = TRUE)
+```
+
+[Click here](networks/finalRecon3DNetwork.html) to open Recon3D network.
+

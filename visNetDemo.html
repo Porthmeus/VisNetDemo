@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Jan Taubenheim" />
+  <meta name="dcterms.date" content="2023-04-27" />
+  <title>Using visNet for metabolic model display</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="visNetDemo_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="visNetDemo_files/reveal.js-3.3.0.1/css/theme/white.css" id="theme">
+
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <link href="visNetDemo_files/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+    <link href="visNetDemo_files/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">Using visNet for metabolic model display</h1>
+    <h2 class="author">Jan Taubenheim</h2>
+    <h3 class="date">2023-04-27</h3>
+</section>
+
+<section><section id="introduction-to-visnetworks" class="title-slide slide level1"><h1>Introduction to visNetworks</h1></section><section id="introduction-to-visnetworks-1" class="slide level2">
+<h2>Introduction to <code>visNetworks</code></h2>
+<ul>
+<li class="fragment">Based on the <a href="https://visjs.org/">vis.js</a> library - java script library for data visualization and interactions</li>
+<li class="fragment">Provides routines for graph display and simple interactions in html output</li>
+<li class="fragment">Is also suitable to display hierarchical/tree structures</li>
+</ul>
+</section><section id="example" class="slide level2">
+<h2>Example</h2>
+<iframe data-src="https://visjs.github.io/vis-network/examples/network/nodeStyles/circularImages.html" width="100%" height="300&quot;">
+</iframe>
+</section></section>
+<section><section id="simple-walk-through" class="title-slide slide level1"><h1>Simple walk through</h1></section><section id="data-structures-needed" class="slide level2">
+<h2>Data structures needed</h2>
+<p><strong>visNetworks</strong> needs two information</p>
+<ul>
+<li class="fragment">a nodes <code>data.frame</code> with an <em>id</em> column</li>
+<li class="fragment">an edges <code>data.frame</code> with a <em>from</em> and a <em>to</em> column</li>
+</ul>
+</section><section id="minimal-nodes" class="slide level2">
+<h2>Minimal nodes</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">nodes &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">head</span>(nodes)</a></code></pre></div>
+<pre><code>##   id
+## 1  1
+## 2  2
+## 3  3
+## 4  4
+## 5  5</code></pre>
+</section><section id="minimal-edges" class="slide level2">
+<h2>Minimal edges</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">edges &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">from =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="dt">to =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">head</span>(edges)</a></code></pre></div>
+<pre><code>##   from to
+## 1    2  1
+## 2    5  2
+## 3    3  4
+## 4    3  2</code></pre>
+</section><section id="minimal-example" class="slide level2">
+<h2>Minimal example</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">require</span>(visNetwork, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb5-2" title="2">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="dv">300</span>)</a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME1.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME1.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="change-nodes" class="slide level2">
+<h2>Change nodes</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">nodes[[<span class="st">&quot;label&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;N&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(nodes))</a>
+<a class="sourceLine" id="cb6-2" title="2">nodes[[<span class="st">&quot;shape&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;box&quot;</span>,<span class="st">&quot;diamond&quot;</span>,<span class="st">&quot;ellipse&quot;</span>,<span class="st">&quot;dot&quot;</span>,<span class="st">&quot;square&quot;</span>)</a>
+<a class="sourceLine" id="cb6-3" title="3">nodes[[<span class="st">&quot;color&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;pink&quot;</span>,<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;yellow&quot;</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;300&quot;</span>)</a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME2.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME2.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="changing-edges" class="slide level2">
+<h2>Changing edges</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">nodes &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">edges &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">from =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="dt">to =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb7-3" title="3">edges[[<span class="st">&quot;label&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;E&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(edges))</a>
+<a class="sourceLine" id="cb7-4" title="4">edges[[<span class="st">&quot;width&quot;</span>]] &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(edges)</a>
+<a class="sourceLine" id="cb7-5" title="5">edges[[<span class="st">&quot;color&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;pink&quot;</span>,<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;black&quot;</span>)</a>
+<a class="sourceLine" id="cb7-6" title="6">edges[[<span class="st">&quot;arrows&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;to&quot;</span>,<span class="st">&quot;from&quot;</span>,<span class="st">&quot;to;from&quot;</span>,<span class="st">&quot;middle&quot;</span>)</a>
+<a class="sourceLine" id="cb7-7" title="7">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;300&quot;</span>)</a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME3.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME3.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="groups-and-global-settings" class="slide level2">
+<h2>Groups and global settings</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">nodes &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dt">label =</span> <span class="kw">paste</span>(<span class="st">&quot;N&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb8-2" title="2">edges &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">from =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="dt">to =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb8-3" title="3">nodes[[<span class="st">&quot;group&quot;</span>]] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep</span>(<span class="st">&quot;A&quot;</span>, <span class="dv">2</span>), <span class="kw">rep</span>(<span class="st">&quot;B&quot;</span>, <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb8-4" title="4">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;300&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="st">    </span><span class="kw">visNodes</span>(<span class="dt">shape =</span> <span class="st">&quot;square&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="st">    </span><span class="kw">visEdges</span>(<span class="dt">arrows =</span> <span class="st">&quot;to;from&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="st">    </span><span class="kw">visGroups</span>(<span class="dt">groupname =</span> <span class="st">&quot;A&quot;</span>, <span class="dt">shape =</span> <span class="st">&quot;box&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="st">    </span><span class="kw">visGroups</span>(<span class="dt">groupname =</span> <span class="st">&quot;B&quot;</span>, <span class="dt">color =</span> <span class="st">&quot;red&quot;</span>)</a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME4.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME4.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="adding-a-legend" class="slide level2">
+<h2>Adding a legend</h2>
+<p>Default on groups:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">net.legend &lt;-<span class="st"> </span>net <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">visLegend</span>()</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw">visSave</span>(net.legend, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME5.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME5.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="adding-a-legend-1" class="slide level2">
+<h2>Adding a legend</h2>
+<p>Custom legend:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">nodes.legend &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">label =</span> <span class="kw">c</span>(<span class="st">&quot;box-nodes&quot;</span>,<span class="st">&quot;square-nodes&quot;</span>),</a>
+<a class="sourceLine" id="cb10-2" title="2">                           <span class="dt">shape =</span> <span class="kw">c</span>(<span class="st">&quot;box&quot;</span>,<span class="st">&quot;square&quot;</span>),</a>
+<a class="sourceLine" id="cb10-3" title="3">                           <span class="dt">color =</span> <span class="kw">c</span>(<span class="st">&quot;cornflowerblue&quot;</span>, <span class="st">&quot;red&quot;</span>))</a>
+<a class="sourceLine" id="cb10-4" title="4">net.legend &lt;-<span class="st"> </span>net <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="st">    </span><span class="kw">visLegend</span>(<span class="dt">useGroups =</span> <span class="ot">FALSE</span>, <span class="dt">addNodes =</span> nodes.legend)</a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="kw">visSave</span>(net.legend, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME6.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME6.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="information-for-hovering" class="slide level2">
+<h2>Information for hovering</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">nodes &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">id =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dt">title =</span> <span class="kw">paste</span>(<span class="st">&quot;N&quot;</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb11-2" title="2">edges &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">from =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="dt">to =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb11-3" title="3"></a>
+<a class="sourceLine" id="cb11-4" title="4">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;300&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="st">    </span><span class="kw">visNodes</span>(<span class="dt">shape =</span> <span class="st">&quot;dot&quot;</span>)</a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME7.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME7.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="highlighting" class="slide level2">
+<h2>Highlighting</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">net.high &lt;-<span class="st"> </span>net <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="st">    </span><span class="kw">visOptions</span>(<span class="dt">highlightNearest =</span> <span class="kw">list</span>(<span class="dt">enabled =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb12-3" title="3">                                       <span class="dt">degree =</span> <span class="dv">1</span>))</a>
+<a class="sourceLine" id="cb12-4" title="4"></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="kw">visSave</span>(net.high, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME8.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME8.html" width="100%" height="300&quot;">
+</iframe>
+</section><section id="node-selection" class="slide level2">
+<h2>Node selection</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">nodes[<span class="st">&quot;selection&quot;</span>] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A,N1&quot;</span>,<span class="st">&quot;A,N2&quot;</span>,<span class="st">&quot;B,N3&quot;</span>,<span class="st">&quot;B,N4&quot;</span>,<span class="st">&quot;B,N5&quot;</span>)</a>
+<a class="sourceLine" id="cb13-2" title="2">net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(nodes, edges, <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;300&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-3" title="3"><span class="st">    </span><span class="kw">visOptions</span>(<span class="dt">selectedBy =</span> <span class="kw">list</span>(<span class="dt">variable =</span> <span class="st">&quot;selection&quot;</span>,</a>
+<a class="sourceLine" id="cb13-4" title="4">                               <span class="dt">multiple =</span> <span class="ot">TRUE</span>))</a>
+<a class="sourceLine" id="cb13-5" title="5"></a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="kw">visSave</span>(net, <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;ME9.html&quot;</span>))</a></code></pre></div>
+<iframe data-src="networks/ME9.html" width="100%" height="300&quot;">
+</iframe>
+</section></section>
+<section><section id="applying-it-to-metabolic-models---recon3d-as-example" class="title-slide slide level1"><h1>Applying it to metabolic models - Recon3D as example</h1></section><section id="creating-a-base-egde-table" class="slide level2">
+<h2>Creating a base egde table</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb14-1" title="1"><span class="im">import</span> sys</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="im">import</span> cobra <span class="im">as</span> cb</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="im">import</span> pandas <span class="im">as</span> pd</a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="im">import</span> numpy <span class="im">as</span> np</a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="im">from</span> pathlib <span class="im">import</span> Path</a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="im">from</span> itertools <span class="im">import</span> product</a>
+<a class="sourceLine" id="cb14-7" title="7"></a>
+<a class="sourceLine" id="cb14-8" title="8"><span class="kw">def</span> sbml2networkcsv(Path:sbmlfile) <span class="op">-&gt;</span> pd.DataFrame</a>
+<a class="sourceLine" id="cb14-9" title="9"></a>
+<a class="sourceLine" id="cb14-10" title="10"><span class="co">&quot;&quot;&quot; reads a metabolic model from an sbml and returns a data frame with the basic edge informations&quot;&quot;&quot;</span></a>
+<a class="sourceLine" id="cb14-11" title="11"></a>
+<a class="sourceLine" id="cb14-12" title="12">col3d <span class="op">=</span> cb.io.read_sbml_model(sbmlfile)</a>
+<a class="sourceLine" id="cb14-13" title="13"></a>
+<a class="sourceLine" id="cb14-14" title="14"><span class="co"># go through the reaction and create a data frame which contains the network</span></a>
+<a class="sourceLine" id="cb14-15" title="15">dat_all <span class="op">=</span> pd.DataFrame()</a>
+<a class="sourceLine" id="cb14-16" title="16"><span class="cf">for</span> rxn <span class="kw">in</span> col3d.reactions:</a>
+<a class="sourceLine" id="cb14-17" title="17">    left <span class="op">=</span> [x.<span class="bu">id</span> <span class="cf">for</span> x <span class="kw">in</span> rxn.metabolites <span class="cf">if</span> rxn.metabolites[x] <span class="op">&lt;</span><span class="dv">0</span>] <span class="co"># get left side of formula</span></a>
+<a class="sourceLine" id="cb14-18" title="18">    right <span class="op">=</span> [x.<span class="bu">id</span> <span class="cf">for</span> x <span class="kw">in</span> rxn.metabolites <span class="cf">if</span> rxn.metabolites[x] <span class="op">&gt;</span><span class="dv">0</span>] <span class="co"># get right side of formula</span></a>
+<a class="sourceLine" id="cb14-19" title="19">    dat <span class="op">=</span> pd.DataFrame(product(left,right), columns <span class="op">=</span> [<span class="st">&quot;from.id&quot;</span>,<span class="st">&quot;to.id&quot;</span>]) <span class="co"># create edges between them</span></a>
+<a class="sourceLine" id="cb14-20" title="20">    dat[<span class="st">&quot;reaction&quot;</span>] <span class="op">=</span> rxn.<span class="bu">id</span> <span class="co"># add the reaction id </span></a>
+<a class="sourceLine" id="cb14-21" title="21">    dat[<span class="st">&quot;subsystem&quot;</span>] <span class="op">=</span> rxn.subsystem <span class="co"># add the subsystem</span></a>
+<a class="sourceLine" id="cb14-22" title="22">    <span class="cf">if</span> rxn.reversibility: <span class="co"># add information on reversibility</span></a>
+<a class="sourceLine" id="cb14-23" title="23">        dat[<span class="st">&quot;arrows&quot;</span>] <span class="op">=</span> <span class="st">&quot;to;from&quot;</span> </a>
+<a class="sourceLine" id="cb14-24" title="24">    <span class="cf">else</span>: </a>
+<a class="sourceLine" id="cb14-25" title="25">        dat[<span class="st">&quot;arrows&quot;</span>] <span class="op">=</span> <span class="st">&quot;to&quot;</span></a>
+<a class="sourceLine" id="cb14-26" title="26">    dat_all <span class="op">=</span> pd.concat([dat_all, dat])</a>
+<a class="sourceLine" id="cb14-27" title="27"><span class="cf">return</span>(dat_all)</a>
+<a class="sourceLine" id="cb14-28" title="28"></a>
+<a class="sourceLine" id="cb14-29" title="29"><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</a>
+<a class="sourceLine" id="cb14-30" title="30">    dat_all <span class="op">=</span> sbml2networkcsv(Path(sys.args[<span class="dv">1</span>]))</a>
+<a class="sourceLine" id="cb14-31" title="31">    dat_all.to_csv(sys.args[<span class="dv">2</span>],index <span class="op">=</span> <span class="va">False</span>)</a></code></pre></div>
+</section><section id="resulting-table" class="slide level2">
+<h2>Resulting table</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">require</span>(data.table, <span class="dt">quiet =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb15-2" title="2">edg &lt;-<span class="st">  </span><span class="kw">fread</span>(<span class="st">&quot;dat/baseEdges.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="kw">head</span>(edg)</a></code></pre></div>
+<pre><code>##          from.id         to.id     reaction                subsystem arrows
+## 1: 10fthf5glu[c] 10fthf5glu[l] 10FTHF5GLUtl     Transport, lysosomal     to
+## 2: 10fthf5glu[m] 10fthf5glu[c] 10FTHF5GLUtm Transport, mitochondrial     to
+## 3: 10fthf6glu[c] 10fthf6glu[l] 10FTHF6GLUtl     Transport, lysosomal     to
+## 4: 10fthf6glu[m] 10fthf6glu[c] 10FTHF6GLUtm Transport, mitochondrial     to
+## 5: 10fthf7glu[c] 10fthf7glu[l] 10FTHF7GLUtl     Transport, lysosomal     to
+## 6: 10fthf7glu[m] 10fthf7glu[c] 10FTHF7GLUtm Transport, mitochondrial     to</code></pre>
+</section><section id="removing-cofactors" class="slide level2">
+<h2>Removing cofactors</h2>
+<ul>
+<li class="fragment">Cofactors would overcrowd the network and make it less comprehensible, thus we remove it</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">rm.mets &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="kw">file.path</span>(<span class="st">&quot;dat&quot;</span>,<span class="st">&quot;cofactorsAnorganicCompounds.csv&quot;</span>))</a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="kw">head</span>(rm.mets)</a></code></pre></div>
+<pre><code>##    mets
+## 1:    h
+## 2:  h2o
+## 3:  na1
+## 4:  atp
+## 5:  coa
+## 6:   pi</code></pre>
+</div>
+</section><section id="removing-cofactors-1" class="slide level2">
+<h2>Removing cofactors</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="co"># remove the cofactors from the edge list</span></a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="kw">nrow</span>(edg)</a></code></pre></div>
+<pre><code>## [1] 48189</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">edg &lt;-<span class="st"> </span>edg[(<span class="op">!</span><span class="kw">gsub</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">[[a-z]</span><span class="ch">\\</span><span class="st">]&quot;</span>,<span class="st">&quot;&quot;</span>,from.id) <span class="op">%in%</span><span class="st"> </span>rm.mets[,mets]),]</a>
+<a class="sourceLine" id="cb21-2" title="2">edg &lt;-<span class="st"> </span>edg[(<span class="op">!</span><span class="kw">gsub</span>(<span class="st">&quot;</span><span class="ch">\\</span><span class="st">[[a-z]</span><span class="ch">\\</span><span class="st">]&quot;</span>,<span class="st">&quot;&quot;</span>,to.id) <span class="op">%in%</span><span class="st"> </span>rm.mets[,mets]),]</a>
+<a class="sourceLine" id="cb21-3" title="3"><span class="kw">colnames</span>(edg)[<span class="dv">3</span>] &lt;-<span class="st"> &quot;rxn.id&quot;</span></a>
+<a class="sourceLine" id="cb21-4" title="4"><span class="kw">nrow</span>(edg)</a></code></pre></div>
+<pre><code>## [1] 12685</code></pre>
+</section><section id="creating-the-correct-tables-for-visnetwork" class="slide level2">
+<h2>Creating the correct tables for visNetwork</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1"><span class="co"># create a nodes data frame</span></a>
+<a class="sourceLine" id="cb23-2" title="2">nodes.id &lt;-<span class="st"> </span><span class="kw">data.table</span>(<span class="dt">met.id =</span> <span class="kw">unique</span>(<span class="kw">c</span>(edg[,from.id], edg[,to.id])))</a>
+<a class="sourceLine" id="cb23-3" title="3">nodes.id[,id <span class="op">:</span><span class="er">=</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(nodes.id)]</a>
+<a class="sourceLine" id="cb23-4" title="4"><span class="kw">head</span>(nodes.id)</a></code></pre></div>
+<pre><code>##           met.id id
+## 1: 10fthf5glu[c]  1
+## 2: 10fthf5glu[m]  2
+## 3: 10fthf6glu[c]  3
+## 4: 10fthf6glu[m]  4
+## 5: 10fthf7glu[c]  5
+## 6: 10fthf7glu[m]  6</code></pre>
+</section><section id="adding-tofrom-columns-for-edges" class="slide level2">
+<h2>Adding to/from columns for edges</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">edges.id &lt;-<span class="st"> </span><span class="kw">merge</span>(edg, nodes.id[,.(met.id,id)], <span class="dt">by.y =</span> <span class="st">&quot;met.id&quot;</span>, <span class="dt">by.x =</span> <span class="st">&quot;to.id&quot;</span>, <span class="dt">all.x =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb25-2" title="2">edges.id &lt;-<span class="st"> </span><span class="kw">merge</span>(edges.id, nodes.id[,.(met.id,id)], <span class="dt">by.y =</span> <span class="st">&quot;met.id&quot;</span>, <span class="dt">by.x =</span> <span class="st">&quot;from.id&quot;</span>, <span class="dt">suffix =</span><span class="kw">c</span>(<span class="st">&quot;.to_index&quot;</span>,<span class="st">&quot;.from_index&quot;</span>), <span class="dt">all.x =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb25-3" title="3"><span class="co"># rename the columns</span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="kw">colnames</span>(edges.id)[<span class="kw">grep</span>(<span class="st">&quot;_index&quot;</span>, <span class="kw">colnames</span>(edges.id))] &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;to&quot;</span>,<span class="st">&quot;from&quot;</span>)</a>
+<a class="sourceLine" id="cb25-5" title="5">edges.id &lt;-<span class="st"> </span>edges.id[<span class="op">!</span><span class="kw">is.na</span>(to) <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(from),]</a>
+<a class="sourceLine" id="cb25-6" title="6"><span class="co"># sort columns</span></a>
+<a class="sourceLine" id="cb25-7" title="7">sel &lt;-<span class="st"> </span><span class="kw">unique</span>(<span class="kw">c</span>(<span class="st">&quot;to&quot;</span>,<span class="st">&quot;from&quot;</span>, <span class="kw">colnames</span>(edges.id)))</a>
+<a class="sourceLine" id="cb25-8" title="8">edges.id &lt;-<span class="st"> </span>edges.id[,..sel]</a>
+<a class="sourceLine" id="cb25-9" title="9"><span class="kw">head</span>(edges.id)</a></code></pre></div>
+<pre><code>##      to from       from.id         to.id          rxn.id            subsystem
+## 1:  906    1 10fthf5glu[c] 10fthf5glu[l]    10FTHF5GLUtl Transport, lysosomal
+## 2:    3    1 10fthf5glu[c] 10fthf6glu[c]           FPGS8    Folate metabolism
+## 3: 4343  905 10fthf5glu[e]     10fthf[e] GGH_10FTHF5GLUe    Folate metabolism
+## 4:  978  905 10fthf5glu[e]      glu_L[e] GGH_10FTHF5GLUe    Folate metabolism
+## 5: 4203  906 10fthf5glu[l]     10fthf[l] GGH_10FTHF5GLUl    Folate metabolism
+## 6:  979  906 10fthf5glu[l]      glu_L[l] GGH_10FTHF5GLUl    Folate metabolism
+##    arrows
+## 1:     to
+## 2:     to
+## 3:     to
+## 4:     to
+## 5:     to
+## 6:     to</code></pre>
+</section><section id="adding-more-information" class="slide level2">
+<h2>Adding more information</h2>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">bas &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="kw">file.path</span>(<span class="st">&quot;dat&quot;</span>,<span class="st">&quot;Mets2Subsystems.csv&quot;</span>))</a>
+<a class="sourceLine" id="cb27-2" title="2">nodes.id &lt;-<span class="st"> </span><span class="kw">merge</span>(nodes.id,</a>
+<a class="sourceLine" id="cb27-3" title="3">                  bas[,.(<span class="dt">met.id =</span> metabolite,</a>
+<a class="sourceLine" id="cb27-4" title="4">                         met.name, subsystem)],</a>
+<a class="sourceLine" id="cb27-5" title="5">                  <span class="dt">by =</span> <span class="st">&quot;met.id&quot;</span>,</a>
+<a class="sourceLine" id="cb27-6" title="6">                  <span class="dt">keep.x =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb27-7" title="7"><span class="co"># collapse the subsystems column</span></a>
+<a class="sourceLine" id="cb27-8" title="8">nodes.id &lt;-<span class="st"> </span>nodes.id[,.(<span class="dt">subsystem =</span> <span class="kw">paste</span>(<span class="kw">gsub</span>(<span class="st">&quot;,&quot;</span>,<span class="st">&quot;;&quot;</span>,subsystem), <span class="dt">collapse =</span> <span class="st">&quot;,&quot;</span>)),</a>
+<a class="sourceLine" id="cb27-9" title="9">                     by =<span class="st"> </span>.(id, met.id,met.name)]</a>
+<a class="sourceLine" id="cb27-10" title="10"><span class="kw">head</span>(nodes.id)</a></code></pre></div>
+<pre><code>##     id        met.id                           met.name
+## 1:   1 10fthf5glu[c] 10-Formyltetrahydrofolate-[Glu](5)
+## 2: 905 10fthf5glu[e] 10-Formyltetrahydrofolate-[Glu](5)
+## 3: 906 10fthf5glu[l] 10-Formyltetrahydrofolate-[Glu](5)
+## 4:   2 10fthf5glu[m] 10-Formyltetrahydrofolate-[Glu](5)
+## 5:   3 10fthf6glu[c] 10-Formyltetrahydrofolate-[Glu](6)
+## 6: 907 10fthf6glu[e] 10-Formyltetrahydrofolate-[Glu](6)
+##                                                                                subsystem
+## 1:     Transport; lysosomal,Transport; mitochondrial,Folate metabolism,Folate metabolism
+## 2: Exchange/demand reaction,Folate metabolism,Folate metabolism,Exchange/demand reaction
+## 3:                              Transport; lysosomal,Folate metabolism,Folate metabolism
+## 4:                          Transport; mitochondrial,Folate metabolism,Folate metabolism
+## 5:     Transport; lysosomal,Transport; mitochondrial,Folate metabolism,Folate metabolism
+## 6: Exchange/demand reaction,Folate metabolism,Folate metabolism,Exchange/demand reaction</code></pre>
+</section><section id="creating-the-final-network" class="slide level2">
+<h2>Creating the final network</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="co"># sort and rename edges and nodes</span></a>
+<a class="sourceLine" id="cb29-2" title="2">nodes.final &lt;-<span class="st"> </span>nodes.id[,.(id, <span class="dt">label =</span> met.id, <span class="dt">title =</span> met.name, subsystem)]</a>
+<a class="sourceLine" id="cb29-3" title="3">edges.final &lt;-<span class="st"> </span>edges.id[,.(to, from, <span class="dt">label =</span> rxn.id, <span class="dt">title =</span> subsystem)]</a>
+<a class="sourceLine" id="cb29-4" title="4"><span class="co"># create the network representation</span></a>
+<a class="sourceLine" id="cb29-5" title="5">vis.net &lt;-<span class="st"> </span><span class="kw">visNetwork</span>(<span class="dt">nodes =</span> nodes.final,</a>
+<a class="sourceLine" id="cb29-6" title="6">                      <span class="dt">edges =</span> edges.final,</a>
+<a class="sourceLine" id="cb29-7" title="7">                      <span class="dt">main =</span> <span class="st">&quot;Recon3D map&quot;</span>,</a>
+<a class="sourceLine" id="cb29-8" title="8">                      <span class="dt">width =</span> <span class="st">&quot;100%&quot;</span>, <span class="dt">height =</span> <span class="st">&quot;1300px&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb29-9" title="9"><span class="st">    </span><span class="co"># use this for large networks (otherwise physics calc. take very long)</span></a>
+<a class="sourceLine" id="cb29-10" title="10"><span class="st">    </span><span class="kw">visIgraphLayout</span>(<span class="dt">layout =</span> <span class="st">&quot;layout_components&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb29-11" title="11"><span class="st">    </span><span class="kw">visOptions</span>(<span class="dt">highlightNearest =</span> <span class="kw">list</span>(<span class="dt">enabled =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb29-12" title="12">                                     <span class="dt">degree =</span> <span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb29-13" title="13">              <span class="dt">nodesIdSelection =</span> <span class="kw">list</span>(<span class="dt">enabled =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb29-14" title="14">                                      <span class="dt">main =</span> <span class="st">&quot;Select metabolite ID&quot;</span>),</a>
+<a class="sourceLine" id="cb29-15" title="15">              <span class="dt">selectedBy =</span> <span class="kw">list</span>(<span class="dt">variable =</span> <span class="st">&quot;subsystem&quot;</span>,</a>
+<a class="sourceLine" id="cb29-16" title="16">                                <span class="dt">multiple =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb29-17" title="17">                                <span class="dt">hideColor =</span> <span class="st">&quot;#C8C8C84C&quot;</span>,</a>
+<a class="sourceLine" id="cb29-18" title="18">                                <span class="dt">main =</span> <span class="st">&quot;Select subsystem&quot;</span>)</a>
+<a class="sourceLine" id="cb29-19" title="19">              )</a>
+<a class="sourceLine" id="cb29-20" title="20"><span class="kw">visSave</span>(vis.net,</a>
+<a class="sourceLine" id="cb29-21" title="21">        <span class="dt">file =</span> <span class="kw">file.path</span>(<span class="st">&quot;networks&quot;</span>, <span class="st">&quot;finalRecon3DNetwork.html&quot;</span>),</a>
+<a class="sourceLine" id="cb29-22" title="22">        <span class="dt">selfcontained =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<p><a href="networks/finalRecon3DNetwork.html">Click here</a> to open Recon3D network.</p>
+</section></section>
+    </div>
+  </div>
+
+  <script src="visNetDemo_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="visNetDemo_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Vertical centering of slides
+        center: false,
+        // Transition style
+        transition: 'fade', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
+        // Parallax background image
+        parallaxBackgroundImage: './map01100_light.jpg', // e.g. "'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg'"
+        // Parallax background size
+        parallaxBackgroundSize: '3274px 2140px', // CSS syntax, e.g. "2100px 900px"
+
+
+
+        chalkboard: {
+          theme: 'whiteboard',
+        },
+
+        keyboard: {
+          67: function() { RevealChalkboard.toggleNotesCanvas() },    // toggle notes canvas when 'c' is pressed
+          66: function() { RevealChalkboard.toggleChalkboard() }, // toggle chalkboard when 'b' is pressed
+          46: function() { RevealChalkboard.clear() },    // clear chalkboard when 'DEL' is pressed
+           8: function() { RevealChalkboard.reset() },    // reset chalkboard data on current slide when 'BACKSPACE' is pressed
+          68: function() { RevealChalkboard.download() }, // downlad recorded chalkboard drawing when 'd' is pressed
+        },
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'visNetDemo_files/reveal.js-3.3.0.1/plugin/search/search.js', async: true },
+          { src: 'visNetDemo_files/reveal.js-3.3.0.1/plugin/chalkboard/chalkboard.js', async: true },
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>
